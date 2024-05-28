@@ -143,8 +143,8 @@ bool Map::isValid(const Position &pos, MovingObject *mv_obj) const
         if (mv_obj->getName() == "Watson") {
             
             FakeWall * fakeWall = dynamic_cast<FakeWall*>(element);
-            Character * mv_obj = dynamic_cast<Character*>(mv_obj);
-            if (mv_obj->getExp() < fakeWall->getReqExp()) {
+            Character * character = dynamic_cast<Character*>(mv_obj);
+            if (character->getExp() < fakeWall->getReqExp()) {
                 return false;
             }
         }
@@ -183,21 +183,26 @@ Position::Position(const string & str_pos) {
     // (<r>, <c>)
     int r = 0;
     int c = 0;
-    int i = 0;
+    int i = 1;
     while (str_pos[i] != ',') {
-        if (str_pos[i] == '(') {
+        if ( str_pos[i] == ' '){
             i++;
+            continue;
         }
-        else{
-            r = r * 10 + (str_pos[i] - '0');
-            i++;
-        }
+        r = r * 10 + (str_pos[i] - '0');
+        i++;
     }
     i++;
+    // cout << c << "\n";
     while (str_pos[i] != ')') {
+        if ( str_pos[i] == ' '){
+            i++;
+            continue;
+        }
         c = c * 10 + (str_pos[i] - '0');
         i++;
     }
+
     this->r = r;
     this->c = c;
 }
@@ -279,9 +284,10 @@ void MovingObject::setIndex(int index) {
 
 //class Character
 
-Character::Character(int index, const Position& init_pos, Map* map, int init_hp, int init_exp, const string& name) : MovingObject(index, init_pos, map, name) {
+Character::Character(int index, const Position& init_pos, Map* map, int init_hp, int init_exp, const string& name, string moving_rule) : MovingObject(index, init_pos, map, name) {
     this->hp = init_hp;
     this->exp = init_exp;
+    this->moving_rule = moving_rule;
     //constructor
 }
 
@@ -309,8 +315,8 @@ void Character::setExp(int exp)
 
 //class Sherlock
 
-Sherlock::Sherlock(int index, const string& moving_rule, const Position& init_pos, Map* map, int init_hp, int init_exp) : Character(index, init_pos, map, init_hp, init_exp, "Sherlock"){
-    this->moving_rule = moving_rule;
+Sherlock::Sherlock(int index, const string& moving_rule, const Position& init_pos, Map* map, int init_hp, int init_exp) : Character(index, init_pos, map, init_hp, init_exp, "Sherlock", moving_rule){
+    this->cur_moving_rule = moving_rule;
     //constructor
 }
 
@@ -318,9 +324,9 @@ Position Sherlock::getNextPosition() {
     if (this->getHp() == 0){
         return this->pos.npos;
     }
-    char current = this->moving_rule[0];
-    if (this->moving_rule.length() > 1) {
-        this->moving_rule = this->moving_rule.substr(1) + current; 
+    char current = this->cur_moving_rule[0];
+    if (this->cur_moving_rule.length() > 1) {
+        this->cur_moving_rule = this->cur_moving_rule.substr(1) + current; 
     }
     int r = this->pos.getRow();
     int c = this->pos.getCol();
@@ -346,7 +352,7 @@ Position Sherlock::getNextPosition() {
 
 void Sherlock::move() {
     Position next = this->getNextPosition();
-    cout << "Sherlock::move()" << endl;
+    // cout << "Sherlock::move()" << endl;
     if (next.isEqual(this->pos.npos)) {
         return;
     }
@@ -425,22 +431,26 @@ void Sherlock::sherlock_action(ArrayMovingObject * arr_mv_objs, SherlockBag * sh
 
 //class Watson 
 
-Watson::Watson(int index, const string& moving_rule, const Position& init_pos, Map* map, int init_hp, int init_exp) : Character(index, init_pos, map, init_hp, init_exp, "Watson") {
-    this->moving_rule = moving_rule;
+Watson::Watson(int index, const string& moving_rule, const Position& init_pos, Map* map, int init_hp, int init_exp) : Character(index, init_pos, map, init_hp, init_exp, "Watson", moving_rule) {
+    this->cur_moving_rule = moving_rule;
     //constructor
 }
 
 Position Watson::getNextPosition() {
+    // cout << this->cur_moving_rule;
     if (this->getHp() == 0){
         return this->pos.npos;
     }
-    char current = this->moving_rule[0];
-    if (this->moving_rule.length() > 1) {
-        this->moving_rule = this->moving_rule.substr(1) + current; 
+    char current = this->cur_moving_rule[0];
+    if (this->cur_moving_rule.length() > 1) {
+        this->cur_moving_rule = this->cur_moving_rule.substr(1) + current; 
     }
     
     int r = this->pos.getRow();
     int c = this->pos.getCol();
+
+    // cout <<r << " " << c << "\n";
+    // cout <<current << "\n";
 
     if (current == 'U') {
         r--;
@@ -452,6 +462,7 @@ Position Watson::getNextPosition() {
         c++;
     }
 
+    // cout <<r << " " << c << "\n";
     if (this->map->isValid(Position(r, c), this)) {
         return Position(r, c);
     }
@@ -633,7 +644,7 @@ string Criminal::str() const {
 ArrayMovingObject::ArrayMovingObject(int capacity) {
     this->capacity = capacity;
     this->count = 0;
-    this->arr_mv_objs = (MovingObject*)malloc(sizeof(MovingObject) * capacity);
+    this->arr_mv_objs = (MovingObject**)malloc(sizeof(MovingObject*) * capacity);
 }
 
 ArrayMovingObject::~ArrayMovingObject() {
@@ -644,7 +655,8 @@ ArrayMovingObject::~ArrayMovingObject() {
 
 bool ArrayMovingObject::add(MovingObject * mv_obj) {
     if (this->count < this->capacity) {
-        this->arr_mv_objs[mv_obj->getIndex()] = *mv_obj;
+        this->arr_mv_objs[mv_obj->getIndex()] = mv_obj;
+        this->count++;
         return true;
     }
     else {
@@ -654,7 +666,7 @@ bool ArrayMovingObject::add(MovingObject * mv_obj) {
 
 MovingObject *ArrayMovingObject::get(int index) const
 {
-    return &this->arr_mv_objs[index];
+    return this->arr_mv_objs[index];
 }
 
 bool ArrayMovingObject::isFull() const {
@@ -667,9 +679,9 @@ int ArrayMovingObject::size() const {
 
 string ArrayMovingObject::str() const {
     //ArrayMovingObject[count=<count>;capacity=<capacity>;<MovingObject1>;...]
-    string result = "ArrayMovingObject[count=" + to_string(this->count) + ";capacity=" + to_string(this->capacity) + ";";
+    string result = "ArrayMovingObject[count=" + to_string(this->count) + ";capacity=" + to_string(this->capacity) ;
     for (int i = 0; i < this->count; i++) {
-        result += this->arr_mv_objs[i].str() + ";";
+        result += ";" + this->arr_mv_objs[i]->str() ;
     }
     result += "]";
     return result;
@@ -1062,7 +1074,7 @@ void RobotS::move() {
 
 string RobotS::str() const {
     //RobotS[index=<index>;pos=<pos>]
-    return "RobotS[pos=" +  this->pos.str() + ";type=S;dist="+to_string(getDistance(this->sherlock))+"]";
+    return "RobotS[pos=" +  this->pos.str() + ";type=S;dist="+to_string(getDistance())+"]";
 }
 
 RobotW::RobotW(int index, const Position& init_pos, Map* map, Criminal* criminal, Watson * watson) : Robot(index, init_pos, map, criminal) {
@@ -1110,7 +1122,7 @@ void RobotW::move() {
 
 string RobotW::str() const {
     //RobotW[index=<index>;pos=<pos>]
-    return "RobotW[pos=" +  this->pos.str() + ";type=W;dist="+to_string(getDistance(this->watson))+"]";
+    return "RobotW[pos=" +  this->pos.str() + ";type=W;dist="+to_string(getDistance())+"]";
 }
 
 RobotSW::RobotSW(int index, const Position& init_pos, Map* map, Criminal* criminal, Sherlock* sherlock, Watson* watson) : Robot(index, init_pos, map, criminal) {
@@ -1464,7 +1476,12 @@ void StudyPinkProgram::run(bool verbose){
                 Watson * watson = dynamic_cast<Watson*>(arr_mv_objs->get(i));
                 watson->watson_action(arr_mv_objs, sherlock_bag, watson_bag);
             }
-        }
+
+            if (arr_mv_objs->get(i)->getName() == "Robot") {
+                Robot * robot = dynamic_cast<Robot*>(arr_mv_objs->get(i));
+                robot->move();
+            }
+        }   
     }
     printResult();
 }

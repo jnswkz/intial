@@ -85,6 +85,9 @@ public:
     Map(int num_rows, int num_cols, int num_walls, Position * array_walls, int num_fake_walls, Position * array_fake_walls);// : num_rows(num_rows), num_cols(num_cols);
     ~Map();
     bool isValid( const Position & pos , MovingObject * mv_obj ) const ;
+    MapElement *** getMap() const { return map; };
+    int getNumRows() const { return num_rows; };
+    int getNumCols() const { return num_cols; };
 
     void printMap() ;
 };
@@ -140,9 +143,10 @@ class Character : public MovingObject {
 protected:
     int hp;
     int exp;
+    string moving_rule;
 public:
     friend class TestStudyPink;
-    Character(int index, const Position & pos, Map * map, int hp, int exp, const string & name);
+    Character(int index, const Position & pos, Map * map, int hp, int exp, const string & name, string moving_rule);
     virtual ~Character();
     int getHp() const;
     int getExp() const;
@@ -152,7 +156,7 @@ public:
 
 class Sherlock : public Character {
 private:
-    string moving_rule;
+    string cur_moving_rule;
 
 public:
     friend class TestStudyPink;
@@ -172,7 +176,7 @@ public:
 class Watson : public Character{
 private:
     // TODO
-    string moving_rule;
+    string cur_moving_rule;
 
 
 public:
@@ -214,7 +218,7 @@ public:
 class ArrayMovingObject {
 private:
     // TODO
-    MovingObject * arr_mv_objs;
+    MovingObject ** arr_mv_objs;
     int count;
     int capacity;
 public:
@@ -294,6 +298,9 @@ public:
     
     int getDistance(Sherlock * sherlock) const;
     int getDistance(Watson * watson) const;
+
+    virtual Position getNextPosition() = 0;
+    virtual void move() = 0;
 };
 
 class RobotC : public Robot {
@@ -316,6 +323,11 @@ public:
     Position getNextPosition() override;
     void move() override;
     string str() const override;
+
+    int getDistance() const {
+        return Robot::getDistance(sherlock);
+    };
+
 };
 
 class RobotW : public Robot {
@@ -326,6 +338,10 @@ public:
     Position getNextPosition() override;
     void move() override;
     string str() const override;
+
+    int getDistance() const {
+        return Robot::getDistance(watson);
+    }
 };
 
 class RobotSW : public Robot {
