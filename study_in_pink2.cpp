@@ -1435,7 +1435,7 @@ bool StudyPinkProgram::isStop() const{
     // Sherlock catch RobotC and jump to the Criminal if Exp > 500
     RobotC * robotC = nullptr;
     for (int i = 0 ; i < this->arr_mv_objs->size(); i++){
-        if (this->arr_mv_objs->get(i)->getName() == "RobotC"){
+        if (this->arr_mv_objs->get(i)->getName() == "Robot" && dynamic_cast<Robot*>(this->arr_mv_objs->get(i))->getRobotType() == C){
             robotC = dynamic_cast<RobotC*>(this->arr_mv_objs->get(i));
             if (robotC->getCurrentPosition().isEqual(this->sherlock->getCurrentPosition().getRow(), this->sherlock->getCurrentPosition().getCol()) && this->sherlock->getExp() > 500 ){
                 this->sherlock->setPosition(this->criminal->getCurrentPosition());
@@ -1451,7 +1451,7 @@ bool StudyPinkProgram::isStop() const{
 void StudyPinkProgram::run(bool verbose){
     // Note: This is a sample code. You can change the implementation as you like.
     // TODO
-    for (int istep = 0; istep < config->num_steps; ++istep) {
+    for (int istep = 0; istep < config->getNumSteps(); ++istep) {
         for (int i = 0; i < arr_mv_objs->size(); ++i) {
             arr_mv_objs->get(i)->move();
             if (isStop()) {
