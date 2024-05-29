@@ -1030,7 +1030,7 @@ void RobotC::move() {
 
 string RobotC::str() const {
     //RobotC[index=<index>;pos=<pos>]
-    return "RobotC[pos=" +  this->pos.str() + ";type=C;dist=]";
+    return "Robot[pos=" +  this->pos.str() + ";type=C;dist=]";
 }
 
 RobotS::RobotS(int index, const Position& init_pos, Map* map, Criminal* criminal , Sherlock * sherlock) : Robot(index, init_pos, map, criminal) {
@@ -1078,7 +1078,7 @@ void RobotS::move() {
 
 string RobotS::str() const {
     //RobotS[index=<index>;pos=<pos>]
-    return "RobotS[pos=" +  this->pos.str() + ";type=S;dist="+to_string(getDistance())+"]";
+    return "Robot[pos=" +  this->pos.str() + ";type=S;dist="+to_string(getDistance())+"]";
 }
 
 RobotW::RobotW(int index, const Position& init_pos, Map* map, Criminal* criminal, Watson * watson) : Robot(index, init_pos, map, criminal) {
@@ -1126,7 +1126,7 @@ void RobotW::move() {
 
 string RobotW::str() const {
     //RobotW[index=<index>;pos=<pos>]
-    return "RobotW[pos=" +  this->pos.str() + ";type=W;dist="+to_string(getDistance())+"]";
+    return "Robot[pos=" +  this->pos.str() + ";type=W;dist="+to_string(getDistance())+"]";
 }
 
 RobotSW::RobotSW(int index, const Position& init_pos, Map* map, Criminal* criminal, Sherlock* sherlock, Watson* watson) : Robot(index, init_pos, map, criminal) {
@@ -1177,7 +1177,7 @@ void RobotSW::move() {
 
 string RobotSW::str() const {
     //RobotSW[index=<index>;pos=<pos>]
-    return "RobotSW[pos=" +  this->pos.str() + ";type=SW;dist="+to_string(this->getDistance())+"]";
+    return "Robot[pos=" +  this->pos.str() + ";type=SW;dist="+to_string(this->getDistance())+"]";
 }
 
 //Item
