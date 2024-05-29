@@ -591,6 +591,10 @@ Position Criminal::getNextPosition() {
     return Position(t_r, t_c);
 }
 
+Position Criminal::getPreviousPosition() const {
+    return this->previous_pos;
+}
+
 void Criminal::move() {
     Position next = this->getNextPosition();
     if (next.isEqual(this->pos.npos.getRow(), this->pos.npos.getCol())) {
@@ -1013,7 +1017,7 @@ RobotC::RobotC(int index, const Position& init_pos, Map* map, Criminal* criminal
 }
 
 Position RobotC::getNextPosition() {
-    return this->criminal->getCurrentPosition();
+    return this->criminal->getPreviousPosition();
 }
 
 void RobotC::move() {

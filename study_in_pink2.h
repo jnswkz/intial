@@ -210,6 +210,7 @@ public:
     // str
     // ...
     Position getNextPosition() override;
+    Position getPreviousPosition() const;
     void move() override;
     string str() const override;
     void createRobot(ArrayMovingObject * arr_mv_objs);
