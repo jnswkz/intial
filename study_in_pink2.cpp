@@ -230,7 +230,7 @@ void Position::setCol(int c) {
 }
 
 string Position::str() const {
-    return "(" + to_string(this->r) + ", " + to_string(this->c) + ")";
+    return "(" + to_string(this->r) + "," + to_string(this->c) + ")";
 }
 
 bool Position::isEqual(int r, int c) const {
